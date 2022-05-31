@@ -512,10 +512,12 @@ func (hs *clientHandshakeState) doFullHandshake(useCerts bool) error {
 	skx, ok := msg.(*ServerKeyExchangeMsg)
 	if ok {
 		hs.finishedHash.Write(skx.marshal())
-		err = keyAgreement.ProcessServerKeyExchange(c.config, hs.hello, hs.serverHello, c.peerCertificates[0], skx)
-		if err != nil {
-			c.sendAlert(alertUnexpectedMessage)
-			return err
+		if c.peerCertificates != nil {
+			err = keyAgreement.ProcessServerKeyExchange(c.config, hs.hello, hs.serverHello, c.peerCertificates[0], skx)
+			if err != nil {
+				c.sendAlert(alertUnexpectedMessage)
+				return err
+			}
 		}
 
 		msg, err = c.readHandshake()
